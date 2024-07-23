@@ -1,0 +1,10 @@
+<ScrollView contentContainerStyle={styles.scrollContainer} scrollEnabled={true}>
+    {rssItems.map((item, index) => (
+        <TouchableOpacity key={index} onPress={() => handlePress(item)}>
+        <View style={styles.itemContainer}>
+            <Text style={styles.itemTitle}>{item.title}</Text>
+            {/* <Text>{item.description}</Text> */}
+        </View>
+        </TouchableOpacity>
+    ))}
+</ScrollView>
