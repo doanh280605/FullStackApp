@@ -4,7 +4,7 @@ import xml2js from 'react-native-xml2js';
 import { useNavigation } from "@react-navigation/native";
 
 
-const allNews = () => {
+const AllNews = () => {
     const navigation = useNavigation()
 
 
@@ -30,7 +30,8 @@ const allNews = () => {
                     // Store item information into an array for easier reference
                     title: item.title[0],
                     link: item.link[0],
-                    description: typeof item.description[0] === 'string' ? item.description[0] : JSON.stringify(item.description[0]),
+                    description: typeof item.description[0] === 'string' ? JSON.parse(item.description[0]) : (item.description[0]),
+                    image: typeof item?.description[0] === 'string' ? JSON.parse(JSON.parse(JSON.parse(item?.description[0])?.img)[0]?.$)?.src : item.description[0]?.img[0].$.src,
                 }));
                 if (isInitialFetch) {
                     setRssItems(items.slice(0, 10));  // Set the first 10 items initially
@@ -132,4 +133,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default allNews
+export default AllNews

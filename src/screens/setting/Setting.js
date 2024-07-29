@@ -1,5 +1,5 @@
-import {View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity} from 'react-native'
-import React, {useState, useEffect} from 'react'
+import { View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import { Avatar } from 'react-native-elements'
 import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -12,11 +12,16 @@ import vector1 from '../../../assets/photo/Vector1Homescreen.png'
 import vector2 from '../../../assets/photo/Vector2Homescreen.png'
 import pass from '../../../assets/photo/pas.png'
 
-const Setting = ({route}) => {
+const Setting = ({ route }) => {
     const navigation = useNavigation();
 
     const goBack = () => {
         navigation.goBack()
+    }
+
+    const signOut = async () => {
+        await AsyncStorage.removeItem('userToken')
+        navigation.replace('signIn');
     }
 
     const [username, setUsername] = useState(null);
@@ -27,8 +32,8 @@ const Setting = ({route}) => {
         const fetchData = async () => {
             const storedToken = await AsyncStorage.getItem('userToken');
             onLoggedIn(storedToken)
-          };
-          fetchData();      
+        };
+        fetchData();
     }, []);
 
     const onLoggedIn = async (token) => {
@@ -70,7 +75,7 @@ const Setting = ({route}) => {
                 />
                 <View style={styles.layer3}>
                     <TouchableOpacity onPress={goBack}>
-                        <Image 
+                        <Image
                             source={backward}
                             style={styles.group}
                             resizeMode='contain'
@@ -78,16 +83,16 @@ const Setting = ({route}) => {
                     </TouchableOpacity>
 
                     <TouchableOpacity>
-                        <Image 
+                        <Image
                             source={edit}
                             style={styles.notification}
                             resizeMode='contain'
                         />
-                    </TouchableOpacity>                        
+                    </TouchableOpacity>
                 </View>
             </View>
             <View style={styles.avatarContainer}>
-                <Avatar 
+                <Avatar
                     rounded
                     source={avatar}
                     style={styles.avatar}
@@ -99,12 +104,12 @@ const Setting = ({route}) => {
                     <Text style={styles.thongtin}>Tên đại lý</Text>
                     <Text style={styles.value}>Vincom</Text>
                 </View>
-                <Divider orientation='horizontal' style={{marginTop: 10, marginBottom: 20}}/>
+                <Divider orientation='horizontal' style={{ marginTop: 10, marginBottom: 20 }} />
                 <View style={styles.section}>
                     <Text style={styles.thongtin}>Địa chỉ</Text>
                     <Text style={styles.value}>sample</Text>
                 </View>
-                <Divider orientation='horizontal' style={{marginTop: 10, marginBottom: 20}}/>
+                <Divider orientation='horizontal' style={{ marginTop: 10, marginBottom: 20 }} />
                 <View style={styles.section}>
                     <Text style={styles.thongtin}>Điện thoại</Text>
                     <Text style={styles.value}>0983818387</Text>
@@ -113,10 +118,15 @@ const Setting = ({route}) => {
             <View style={styles.doiPass}>
                 <Text style={styles.pass}>Đối mật khẩu</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('changePass')}>
-                    <Image 
+                    <Image
                         source={pass}
                         style={styles.changePass}
                     />
+                </TouchableOpacity>
+            </View>
+            <View style={styles.logout}>
+                <TouchableOpacity onPress={signOut}>
+                    <Text style={styles.dangxuat}>Đăng xuất</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -165,54 +175,67 @@ const styles = StyleSheet.create({
     avatar: {
         width: 130,
         height: 130,
-    }, 
+    },
     avatarContainer: {
-        flex: 1, 
+        flex: 1,
         top: 120,
         alignItems: 'center',
-    }, 
+    },
     name: {
-        fontSize: 25, 
-        fontWeight: 'bold', 
+        fontSize: 25,
+        fontWeight: 'bold',
         color: 'black',
         textTransform: 'uppercase',
         marginTop: 20
     },
     information: {
-        flex: 1, 
-        width: '100%', 
-        top: -110, 
-        padding: 10
-    }, 
+        flex: 1,
+        width: '100%',
+        top: -110,
+        padding: 10,
+        backgroundColor: '#ffffff',
+        height: '50%'
+    },
     section: {
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
     thongtin: {
-        fontSize: 20, 
+        fontSize: 20,
         color: 'black'
-    }, 
+    },
     value: {
-        fontSize: 20, 
+        fontSize: 20,
         color: 'black',
         textTransform: 'uppercase',
         fontWeight: 'bold'
-    }, 
+    },
     doiPass: {
         flexShrink: 1,
         width: '100%',
-        top: -350,
+        top: -300,
         flexDirection: 'row',
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        padding: 10
-    }, 
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 10,
+    },
     pass: {
         color: 'black',
         fontSize: 20
-    }, 
+    },
     changePass: {
         marginRight: 10
+    },
+    logout: {
+        width: '100%',
+        height: 80,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#ffffff'
+    },
+    dangxuat: {
+        fontSize: 17,
+        color: 'black'
     }
 })
 

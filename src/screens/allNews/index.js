@@ -1,1 +1,1 @@
-export {default} from './allNews'
+export {default} from './AllNews'

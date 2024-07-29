@@ -19,7 +19,6 @@ import dichvu from "../../../assets/photo/dichvu.png"
 import qrScanner from '../../../assets/photo/CTA.png'
 import vector1 from '../../../assets/photo/Vector1Homescreen.png'
 import vector2 from '../../../assets/photo/Vector2Homescreen.png'
-import { TouchEventType } from "react-native-gesture-handler/lib/typescript/TouchEventType";
 
 const Tab = createBottomTabNavigator();
 
@@ -41,7 +40,7 @@ const HomeScreen = () => {
       <TouchableOpacity onPress={() => handlePress(item)}>
         <View style={styles.itemContainer}>
           <Image
-            style={{ width: deviceWidth, height: 250 }}
+            style={{ width: deviceWidth, height: 220, resizeMode: 'cover'}}
             source={{ uri: item.image }}
           />
           <Text style={styles.itemTitle}>{item.title}</Text>
@@ -130,12 +129,12 @@ const HomeScreen = () => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        <ScrollView scrollEnabled={true} contentContainerStyle={{ flexGrow: 1, padding: 10, backgroundColor: 'red' }} scrollEventThrottle={16} >
-          <View style={{ flex: 1, top: 300 }}>
+        <ScrollView scrollEnabled={true} contentContainerStyle={{ flexGrow: 1, top: 250}} >
+          <View style={{ flex: 1 }}>
             <View style={styles.viewAll}>
-              <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'black' }}>Tin Tức</Text>
+              <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'black' }}>Tin Tức - sự kiện</Text>
               <TouchableOpacity onPress={allNews}>
-                <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'blue' }}>Xem tất cả</Text>
+                <Text style={{ fontSize: 16, color: 'blue' }}>Xem tất cả</Text>
               </TouchableOpacity>
             </View>
             <Carousel
@@ -266,21 +265,20 @@ const styles = StyleSheet.create({
     marginLeft: 20
   },
   itemContainer: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f5f5f5',
     padding: 15,
-    marginBottom: 10,
-    borderRadius: 8,
+    borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 2,
+    alignItems: 'center'
   },
   itemTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
-    color: 'black'
+    textAlign: 'left', 
   },
   scrollContainer: {
     flexGrow: 1,
@@ -320,6 +318,7 @@ const styles = StyleSheet.create({
   viewAll: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center'
   }
 })
 
