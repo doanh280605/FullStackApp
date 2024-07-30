@@ -22,7 +22,7 @@ export default function Navigation() {
     return (
         <GestureHandlerRootView>
             <NavigationContainer>
-                <Stack.Navigator initialRouteName='register' screenOptions={{ headerShown: false }}>
+                <Stack.Navigator initialRouteName='personal' screenOptions={{ headerShown: false }}>
                     <Stack.Screen name='loading' component={LoadingScreen} />
                     <Stack.Screen name="signIn" component={SignInScreen} />
                     <Stack.Screen

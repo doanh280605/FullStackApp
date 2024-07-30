@@ -14,7 +14,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const Personal = ({route}) => {
     const navigation = useNavigation();
     const [username, setUsername] = useState(null);
-    const [email, setEmail] = useState(null)
+    const [email, setEmail] = useState(null);
+    const [city, setCity] = useState(null);
+    const [district, setDistrict] = useState(null);
+    const [ward, setWard] = useState(null)
     const token = route.params;
 
     useEffect(() => {
@@ -40,7 +43,7 @@ const Personal = ({route}) => {
 
     const onLoggedIn = async (token) => {
         try {
-            const response = await fetch(`http://10.86.156.122:5000/private`, {
+            const response = await fetch(`http://192.168.1.13:5000/private`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -49,10 +52,15 @@ const Personal = ({route}) => {
             });
             if (response.status === 200) {
                 const jsonRes = await response.json();
+
                 const name = jsonRes.name;
                 const email = jsonRes.email;
                 setUsername(name)
                 setEmail(email);
+                
+                setCity(jsonRes.city);
+                setDistrict(jsonRes.district);
+                setWard(jsonRes.ward)
             }
         } catch (error) {
             console.log('Error fetching user data: ', error);
@@ -80,7 +88,7 @@ const Personal = ({route}) => {
                         resizeMode='contain'
                     />
                 </TouchableOpacity>
-                <Text style={styles.city}>Tp. Long Xuyên, An Giang</Text>
+                <Text style={styles.city}>{city}, {district}</Text>
                 <View style={{flex: 3, backgroundColor: '#FFFFFF', width: '100%'}}>
                     <Text style={styles.chinhSach}>Chính sách</Text>
                     <Text style={styles.chinhSachCon}>Chính sách bán hàng</Text>

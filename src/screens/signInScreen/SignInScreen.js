@@ -57,7 +57,7 @@ const SignInScreen = () => {
             password,
         };
         // If true: login - false: signup
-        fetch(`http://10.86.157.95:5000/login`, {
+        fetch(`http://192.168.1.13:5000/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

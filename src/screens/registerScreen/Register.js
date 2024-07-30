@@ -13,18 +13,28 @@ const Register = () => {
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
+
     const [isError, setIsError] = useState(false);
     const [message, setMessage] = useState('');
+
     const [gender, setGender] = useState();
 
-    const [selectedCityCode, setSelectedCityCode] = useState(null)
     const [cities, setCities] = useState([]);
     const [selectedCity, setSelectedCity] = useState(null)
+
+    const [selectedCityCode, setSelectedCityCode] = useState(null);
+    const [selectedDistrictCode, setSelectedDistrictCode] = useState(null);
+    const [selectedWardCode, setSelectedWardCode] = useState(null)
 
     const [districts, setDistricts] = useState([]);
     const [selectedDistrict, setSelectedDistrict] = useState(null)
 
-    const bottomSheetRef = useRef(null);
+    const [wards, setWards] = useState([])
+    const [selectedWards, setSelectedWards] = useState(null)
+
+    const bottomSheetCityRef = useRef(null);
+    const bottomSheetDistrictRef = useRef(null);
+    const bottomSheetWardRef = useRef(null);
 
     const handleSheetChanges = useCallback((index) => {
         console.log('handleSheetChanges', index);
@@ -32,12 +42,20 @@ const Register = () => {
 
     const snapPoints = ['25%', '50%', '90%'];
 
-    const handlePresentModalPress = useCallback(() => {
-        bottomSheetRef.current?.present();
+    const handlePresentModalCityPress = useCallback(() => {
+        bottomSheetCityRef.current?.present();
+    }, [])
+
+    const handlePresentModalDistrictPress = useCallback(() => {
+        bottomSheetDistrictRef.current?.present();
+    }, [])
+
+    const handlePresentModalWardPress = useCallback(() => {
+        bottomSheetWardRef.current?.present();
     }, [])
 
     const onLoggedIn = token => {
-        fetch(`${API_URL}/private`, {
+        fetch('http://10.86.157.162:5000/private', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -64,10 +82,14 @@ const Register = () => {
             email,
             name,
             password,
+            city: selectedCityCode, 
+            district: selectedDistrictCode, 
+            ward: selectedWardCode, 
+            sex: gender
         };
         console.log(payload);
         // If true: login - false: signup
-        fetch('http://10.86.157.142:5000/signup', {
+        fetch('http://10.86.157.162:5000/signup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -100,7 +122,7 @@ const Register = () => {
     useEffect(() => {
         const fetchCities = async () => {
             try {
-                const response = await fetch('http://192.168.31.134:5000/city', {
+                const response = await fetch('http://10.86.157.162:5000/city', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -108,9 +130,9 @@ const Register = () => {
                 });
                 if (response.status === 200) {
                     const jsonRes = await response.json();
-                    const cityNames = jsonRes.map(city => city.name)
 
-                    setCities(cityNames)
+
+                    setCities(jsonRes)
                 } else {
                     console.log('Không thể tìm thấy thành phố')
                 }
@@ -121,9 +143,9 @@ const Register = () => {
         fetchCities();
     }, []);
 
-    const fetchDistricts = async (selectedCityCode) => {
+    const fetchDistricts = async (id) => {
         try {
-            const response = await fetch(`http://192.168.31.134:5000/district?parentID=${selectedCityCode}`, {
+            const response = await fetch(`http://10.86.157.162:5000/districts?parentID=${id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -131,7 +153,6 @@ const Register = () => {
             });
             if (response.status === 200) {
                 const jsonRes = await response.json();
-                console.log("parentID: ", selectedCityCode)
                 setDistricts(jsonRes);
             } else {
                 console.log('Không thể tìm thấy quận/huyện');
@@ -140,31 +161,71 @@ const Register = () => {
             console.log('Error fetching districts: ', e);
         }
     }
+    const fetchWards = async (id) => {
+        try {
+            const res = await fetch(`http://10.86.157.162:5000/wards?parentID=${id}`, {
+                method: 'GET', 
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            if(res.status === 200) {
+                const jsonRes = await res.json();
+                setWards(jsonRes)
+            } else {
+                console.log('Không thể tìm thấy phường/xã');
+            }
+        } catch (e) {
+            console.log('Error fetching wards: ', e)
+        }
+    }
 
     const handleCitySelect = (city) => {
-        setSelectedCity(city);
-        setSelectedCityCode(city.code);
-        fetchDistricts(city.code);
-        bottomSheetRef.current?.close();
+        const parentid = parseInt(city.code, 10)
+        setSelectedCity(city.name);
+        setSelectedCityCode(parentid)
+        fetchDistricts(parentid);
+        bottomSheetCityRef.current?.close();
+        setSelectedDistrict('');
+        setSelectedWards('');
     }
 
     const renderCity = ({ item }) => {
         return (
             <TouchableOpacity onPress={() => handleCitySelect(item)} style={styles.itemContainer}>
-                <Text style={styles.cityName}>{item}</Text>
+                <Text style={styles.cityName}>{item.name}</Text>
             </TouchableOpacity>
         )
     }
 
     const handleDistrict = (district) => {
+        const districtCode = parseInt(district.code, 10)
+        setSelectedDistrictCode(districtCode)
         setSelectedDistrict(district.name);
-        bottomSheetRef.current?.close()
+        fetchWards(districtCode)
+        bottomSheetDistrictRef.current?.close();
+        setSelectedWards('');
     }
 
     const renderDistrict = ({ item }) => {
         return (
-            <TouchableOpacity onPress={() => handleDistrict(item)}>
-                <Text style={styles.cityName}>{item}</Text>
+            <TouchableOpacity onPress={() => handleDistrict(item)} style={styles.itemContainer}>
+                <Text style={styles.cityName}>{item.name}</Text>
+            </TouchableOpacity>
+        )
+    }
+
+    const handleWard = (ward) => {
+        setSelectedWards(ward.name);
+        bottomSheetWardRef.current?.close()
+        const wardCode = parseInt(ward.code, 10)
+        setSelectedWardCode(wardCode)
+    }
+
+    const renderWard = ({item}) => {
+        return (
+            <TouchableOpacity onPress={() => handleWard(item)} style={styles.itemContainer}>
+                <Text style={styles.cityName}>{item.name}</Text>
             </TouchableOpacity>
         )
     }
@@ -186,98 +247,104 @@ const Register = () => {
     }
 
     return (
-        <View style={styles.container}>
-            <View style={styles.textinput}>
-                {/* Input fields */}
-                <TextInput
-                    onChangeText={setEmail}
-                    placeholder="Email"
-                    style={styles.input}
-                    autoCapitalize='none'
-                />
-
-                <TextInput
-                    onChangeText={setName}
-                    placeholder='Tên'
-                    style={styles.input}
-                />
-
-                <TextInput
-                    onChangeText={setPassword}
-                    placeholder='Mật khẩu'
-                    style={styles.input}
-                    secureTextEntry={true}
-                />
-
-                <View style={styles.modalView}>
-                    <Modal
-                        transparent={true}
-                        animationType='slide'
-                        visible={modalVisible}
-                        onRequestClose={() => setModalVisible(!modalVisible)}
-                    >
-                        <View style={styles.modalBackGround}>
-                            <View style={[styles.modalContainer]}>
-                                <TouchableOpacity onPress={() => setModalVisible(false)}>
-                                    <Text style={styles.exit}>Đóng</Text>
-                                </TouchableOpacity>
-                                <FlatList
-                                    data={genderOptions}
-                                    keyExtractor={(item) => item.value}
-                                    renderItem={({ item }) => (
-                                        <TouchableOpacity
-                                            style={styles.option}
-                                            onPress={() => handleSelect(item.label)}
-                                        >
-                                            <Text style={styles.optionText}>{item.label}</Text>
-                                        </TouchableOpacity>
-                                    )}
-                                />
-                            </View>
-                        </View>
-                    </Modal>
-                    <TouchableOpacity
-                        onPress={() => setModalVisible(true)}
-                    >
-                        <TextInput style={styles.input} editable={false} placeholder='Giới tính' value={gender}></TextInput>
-                    </TouchableOpacity>
-                </View>
-                <TouchableOpacity onPress={handlePresentModalPress} style={{ width: '100%', }} >
+        <BottomSheetModalProvider>
+            <View style={styles.container}>
+                <View style={styles.textinput}>
+                    {/* Input fields */}
                     <TextInput
+                        onChangeText={setEmail}
+                        placeholder="Email"
                         style={styles.input}
-                        value={selectedCity}
-                        placeholder="Tỉnh/TP"
-                        editable={false}
+                        autoCapitalize='none'
                     />
-                </TouchableOpacity>
 
-
-                <TouchableOpacity onPress={handlePresentModalPress} style={{ width: '100%' }}>
-                    <TextInput 
+                    <TextInput
+                        onChangeText={setName}
+                        placeholder='Tên'
                         style={styles.input}
-                        value={selectedDistrict}
-                        placeholder='Quận/Huyện'
-                        editable={false}
                     />
-                </TouchableOpacity>
 
-                <Text style={[styles.message, { color: isError ? 'red' : 'green' }]}>
-                    {message ? getMessage() : null}
-                </Text>
-                <CustomButton
-                    text="ĐĂNG KÍ"
-                    onPress={onSubmitHandler}
-                />
-                <View style={styles.footerContainer}>
-                    <Text style={{ fontSize: 16 }}>Đã có tài khoản? </Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('signIn')}>
-                        <Text style={styles.signup}>Đăng nhập</Text>
+                    <TextInput
+                        onChangeText={setPassword}
+                        placeholder='Mật khẩu'
+                        style={styles.input}
+                        secureTextEntry={true}
+                    />
+
+                    <View style={styles.modalView}>
+                        <Modal
+                            transparent={true}
+                            animationType='slide'
+                            visible={modalVisible}
+                            onRequestClose={() => setModalVisible(!modalVisible)}
+                        >
+                            <View style={styles.modalBackGround}>
+                                <View style={[styles.modalContainer]}>
+                                    <TouchableOpacity onPress={() => setModalVisible(false)}>
+                                        <Text style={styles.exit}>Đóng</Text>
+                                    </TouchableOpacity>
+                                    <FlatList
+                                        data={genderOptions}
+                                        keyExtractor={(item) => item.value}
+                                        renderItem={({ item }) => (
+                                            <TouchableOpacity
+                                                style={styles.option}
+                                                onPress={() => handleSelect(item.label)}
+                                            >
+                                                <Text style={styles.optionText}>{item.label}</Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    />
+                                </View>
+                            </View>
+                        </Modal>
+                        <TouchableOpacity
+                            onPress={() => setModalVisible(true)}
+                        >
+                            <TextInput style={styles.input} editable={false} placeholder='Giới tính' value={gender}></TextInput>
+                        </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity onPress={handlePresentModalCityPress} style={{ width: '100%', }} >
+                        <TextInput
+                            style={styles.input}
+                            value={selectedCity}
+                            placeholder="Tỉnh/TP"
+                            editable={false}
+                        />
                     </TouchableOpacity>
+                    <TouchableOpacity onPress={handlePresentModalDistrictPress} style={{ width: '100%' }}>
+                        <TextInput
+                            style={styles.input}
+                            value={selectedDistrict}
+                            placeholder='Quận/Huyện'
+                            editable={false}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handlePresentModalWardPress} style={{width: '100%'}}>
+                        <TextInput 
+                            style={styles.input}
+                            value={selectedWards}
+                            placeholder='Phường/Xã'
+                            editable={false}
+                        />
+                    </TouchableOpacity>
+
+                    <Text style={[styles.message, { color: isError ? 'red' : 'green' }]}>
+                        {message ? getMessage() : null}
+                    </Text>
+                    <CustomButton
+                        text="ĐĂNG KÍ"
+                        onPress={onSubmitHandler}
+                    />
+                    <View style={styles.footerContainer}>
+                        <Text style={{ fontSize: 16 }}>Đã có tài khoản? </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('signIn')}>
+                            <Text style={styles.signup}>Đăng nhập</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
-            <BottomSheetModalProvider snapPoints={snapPoints}>
                 <BottomSheetModal
-                    ref={bottomSheetRef}
+                    ref={bottomSheetCityRef}
                     onChange={handleSheetChanges}
                     snapPoints={snapPoints}
                     index={0}
@@ -289,9 +356,34 @@ const Register = () => {
                         />
                     </BottomSheetView>
                 </BottomSheetModal>
-            </BottomSheetModalProvider>
-        </View>
-
+                <BottomSheetModal
+                    ref={bottomSheetDistrictRef}
+                    onChange={handleSheetChanges}
+                    snapPoints={snapPoints}
+                    index={0}
+                >
+                    <BottomSheetView style={styles.contentContainer}>
+                        <FlatList
+                            data={districts}
+                            renderItem={renderDistrict}
+                        />
+                    </BottomSheetView>
+                </BottomSheetModal>
+                <BottomSheetModal 
+                    ref={bottomSheetWardRef}
+                    onChange={handleSheetChanges}
+                    snapPoints={snapPoints}
+                    index={0}
+                >
+                    <BottomSheetView style={styles.contentContainer}>
+                        <FlatList 
+                            data={wards}
+                            renderItem={renderWard}
+                        />
+                    </BottomSheetView>
+                </BottomSheetModal>
+            </View>
+        </BottomSheetModalProvider>
     );
 };
 
@@ -324,7 +416,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         borderWidth: 1,
         borderRadius: 10,
-        color: 'black', 
+        color: 'black',
     },
     textinput: {
         flex: 1,
@@ -374,12 +466,12 @@ const styles = StyleSheet.create({
     },
     flatContainer: {
         flex: 1,
-    }, 
+    },
     cityName: {
-        fontSize: 17, 
-        color: 'black', 
-        
-    }, 
+        fontSize: 17,
+        color: 'black',
+
+    },
     itemContainer: {
         padding: 15,
         borderBottomWidth: 0.5,
